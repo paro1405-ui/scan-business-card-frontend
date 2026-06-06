@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
   isDragOver = false;
   remark = '';
   backendPort = 3000;
-  backendOverride = 'https://many-airfare-architect-feeling.trycloudflare.com'; // set this to a full backend URL when using a remote server or tunnel
+  backendOverride = 'http://13.236.184.70/api'; // set this to a full backend URL when using a remote server or tunnel
 
   ngOnInit() {
     const saved = localStorage.getItem('backendOverride');
