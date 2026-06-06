@@ -1,0 +1,108 @@
+<div class="container">
+
+  <div class="header">
+    <h1>🎯 AI Business Card Scanner</h1>
+    <p class="subtitle">Extract contact information from business cards instantly</p>
+  </div>
+
+  <!-- <div class="backend-config">
+    <label for="backendUrl">Backend URL</label>
+    <input
+      id="backendUrl"
+      type="text"
+      [(ngModel)]="backendOverride"
+      (blur)="saveBackendOverride()"
+      placeholder="https://many-airfare-architect-feeling.trycloudflare.com"
+    />
+    <p class="backend-note">
+      Use this when frontend and backend are served from different hosts or tunnels.
+    </p>
+  </div> -->
+
+  <div class="upload-section">
+    <div class="upload-choice">
+      <div class="choice-item">
+        <input type="radio" id="scan" name="uploadType" value="scan" [(ngModel)]="uploadType" (change)="onUploadTypeChange()">
+        <label for="scan">📷 Scan Business Card</label>
+      </div>
+      <div class="choice-item">
+        <input type="radio" id="upload" name="uploadType" value="upload" [(ngModel)]="uploadType" (change)="onUploadTypeChange()">
+        <label for="upload">📁 Upload Image</label>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" hidden #cameraInput (change)="onFileSelected($event)" accept="image/*" capture="environment">
+  <div class="file-upload-area" (click)="uploadType === 'upload' ? fileInput.click() : (uploadType === 'scan' && cameraInput.click())" [class.dragover]="isDragOver" (dragover)="isDragOver=true" (dragleave)="isDragOver=false" (drop)="onFileDrop($event)">
+    <input type="file" hidden #fileInput (change)="onFileSelected($event)" accept="image/*">
+    <div class="upload-icon">📸</div>
+    <p class="upload-text">
+      {{ !uploadType ? 'Please choose Scan or Upload mode above' : (uploadType === 'upload' ? 'Click to upload or drag and drop' : 'Tap Scan Card to open camera') }}
+    </p>
+    <p class="upload-hint">PNG, JPG, GIF up to 10MB</p>
+    <p *ngIf="selectedFile" class="file-name">✓ {{selectedFile.name}}</p>
+  </div>
+
+  <div class="camera-overlay" *ngIf="cameraActive">
+    <video #video playsinline muted></video>
+    <div class="camera-controls">
+      <button class="capture-btn" (click)="capturePhoto()">📸 Capture</button>
+      <button class="close-camera-btn" (click)="closeCamera()">✖ Close</button>
+    </div>
+  </div>
+
+  <button class="scan-btn" (click)="scanCard()" [disabled]="!uploadType || (uploadType === 'upload' && !selectedFile) || loading || exporting">
+    <span *ngIf="!loading">🚀 Scan Card</span>
+    <span *ngIf="loading">⏳ Scanning...</span>
+  </button>
+
+  <div class="export-section">
+    <button class="export-btn" (click)="exportData()" [disabled]="loading || exporting">
+      <span *ngIf="!exporting">📤 Export Saved Data</span>
+      <span *ngIf="exporting">⏳ Exporting...</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Processing image...</p>
+  </div>
+
+  <div *ngIf="result" class="result-card">
+    <h2>✅ Extracted Details</h2>
+    
+    <div class="details-grid">
+      <div class="detail-item">
+        <label>Name:</label>
+        <p>{{result.name}}</p>
+      </div>
+      <div class="detail-item">
+        <label>Designation:</label>
+        <p>{{result.designation}}</p>
+      </div>
+      <div class="detail-item">
+        <label>Phone:</label>
+        <p>{{result.phone}}</p>
+      </div>
+      <div class="detail-item">
+        <label>Email:</label>
+        <p>{{result.email}}</p>
+      </div>
+      <div class="detail-item">
+        <label>Company:</label>
+        <p>{{result.company}}</p>
+      </div>
+    </div>
+
+    <div class="remark-section">
+      <label for="remark">📝 Remarks:</label>
+      <textarea id="remark" [(ngModel)]="remark" placeholder="Add any additional notes or remarks..." rows="4"></textarea>
+    </div>
+
+    <div class="button-group">
+      <button class="submit-btn" (click)="submitData()">✅ Submit</button>
+      <button class="reset-btn" (click)="startOver()">🔄 Scan Another</button>
+    </div>
+  </div>
+
+</div>
