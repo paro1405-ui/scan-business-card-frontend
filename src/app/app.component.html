@@ -1,8 +1,24 @@
 <div class="container">
 
   <div class="header">
-    <h1>🎯 AI Business Card Scanner</h1>
-    <p class="subtitle">Extract contact information from business cards instantly</p>
+    <div class="header-top">
+      <div class="title-group">
+        <h1>
+          <img src="/assets/zebra-logo-01.png" alt="Logo" class="logo">
+          Business Card Scanner
+        </h1>
+        <p class="subtitle">Extract contact information from business cards instantly</p>
+      </div>
+      <div class="header-actions">
+        <button class="export-btn" (click)="exportData()" [disabled]="loading || exporting">
+          <span *ngIf="!exporting">📤 Export Saved Data</span>
+          <span *ngIf="exporting">⏳ Exporting...</span>
+        </button>
+      </div>
+    </div>
+    <div *ngIf="eventName" class="event-badge">
+      <strong>📅 Event:</strong> {{eventName}}
+    </div>
   </div>
 
   <!-- <div class="backend-config">
@@ -37,7 +53,7 @@
     <input type="file" hidden #fileInput (change)="onFileSelected($event)" accept="image/*">
     <div class="upload-icon">📸</div>
     <p class="upload-text">
-      {{ !uploadType ? 'Please choose Scan or Upload mode above' : (uploadType === 'upload' ? 'Click to upload or drag and drop' : 'Tap Scan Card to open camera') }}
+      {{ !uploadType ? 'Please choose Scan or Upload mode above' : (uploadType === 'upload' ? 'Click to upload or drag and drop (auto-scan enabled)' : 'Tap to open camera (auto-scan enabled)') }}
     </p>
     <p class="upload-hint">PNG, JPG, GIF up to 10MB</p>
     <p *ngIf="selectedFile" class="file-name">✓ {{selectedFile.name}}</p>
@@ -52,16 +68,10 @@
   </div>
 
   <button class="scan-btn" (click)="scanCard()" [disabled]="!uploadType || (uploadType === 'upload' && !selectedFile) || loading || exporting">
-    <span *ngIf="!loading">🚀 Scan Card</span>
+    <span *ngIf="!loading && uploadType === 'scan'">📷 Open Camera</span>
+    <span *ngIf="!loading && uploadType === 'upload'">✓ Ready (Auto-scanning...)</span>
     <span *ngIf="loading">⏳ Scanning...</span>
   </button>
-
-  <div class="export-section">
-    <button class="export-btn" (click)="exportData()" [disabled]="loading || exporting">
-      <span *ngIf="!exporting">📤 Export Saved Data</span>
-      <span *ngIf="exporting">⏳ Exporting...</span>
-    </button>
-  </div>
 
   <div *ngIf="loading" class="loading">
     <div class="spinner"></div>
@@ -91,6 +101,14 @@
       <div class="detail-item">
         <label>Company:</label>
         <p>{{result.company}}</p>
+      </div>
+      <div class="detail-item">
+        <label>Website:</label>
+        <p>{{result.website}}</p>
+      </div>
+      <div class="detail-item">
+        <label>Address:</label>
+        <p>{{result.address}}</p>
       </div>
     </div>
 

@@ -12,9 +12,76 @@
 }
 
 .header {
-  text-align: center;
-  color: white;
   margin-bottom: 40px;
+  text-align: center;
+  position: relative;
+}
+
+.header-top {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.title-group {
+  text-align: center;
+}
+
+.header-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.header h1 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+@media (max-width: 720px) {
+  .header-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .header h1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35em;
+    font-size: 2em;
+  }
+
+  .header-actions {
+    position: static;
+    width: 100%;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  .logo {
+    height: 2.2em;
+    margin-bottom: 0.35em;
+  }
+}
+
+.logo {
+  width: auto;
+  height: 1.4em;
+  object-fit: contain;
 }
 
 .backend-config {
@@ -67,6 +134,20 @@
 .subtitle {
   font-size: 1.1em;
   opacity: 0.9;
+}
+
+.event-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 25px;
+  margin: 15px auto 0 auto;
+  width: fit-content;
+  font-size: 1em;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
 }
 
 .upload-section {

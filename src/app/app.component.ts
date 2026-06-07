@@ -1,5 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -21,13 +22,22 @@ export class AppComponent implements OnInit {
   isDragOver = false;
   remark = '';
   backendPort = 3000;
-  backendOverride = 'http://13.236.184.70/api'; // set this to a full backend URL when using a remote server or tunnel
+  backendOverride = 'http://13.236.184.70'; // Production backend origin
+  eventName = '';
+
+  constructor(private http: HttpClient, private route: ActivatedRoute) {}
 
   ngOnInit() {
     const saved = localStorage.getItem('backendOverride');
     if (saved) {
       this.backendOverride = saved;
     }
+
+    // Get event name from URL query parameters
+    this.route.queryParams.subscribe(params => {
+      this.eventName = params['event'] || 'default';
+      console.log('Event from URL:', this.eventName);
+    });
   }
 
   saveBackendOverride() {
@@ -41,8 +51,13 @@ export class AppComponent implements OnInit {
   }
 
   get backendOrigin() {
-    if (this.backendOverride) {
-      return this.backendOverride.replace(/\/$/, '');
+    const override = this.backendOverride?.trim();
+    if (override) {
+      let normalized = override.replace(/\/$/, '');
+      if (!/^https?:\/\//i.test(normalized)) {
+        normalized = `http://${normalized}`;
+      }
+      return normalized;
     }
 
     const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
@@ -51,15 +66,20 @@ export class AppComponent implements OnInit {
   }
 
   get backendUrl() {
-    return `${this.backendOrigin}/scan-card`;
+    return `${this.backendOrigin}/api/scan-card?event=${encodeURIComponent(this.eventName)}`;
   }
-
-  constructor(private http: HttpClient) {}
 
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
-    if (this.uploadType === 'scan' && this.selectedFile && !this.cameraActive) {
-      this.processScan();
+    if (this.selectedFile && this.uploadType) {
+      // Auto-trigger scan for upload mode
+      if (this.uploadType === 'upload') {
+        setTimeout(() => this.processScan(), 300);
+      }
+      // For scan mode, auto-trigger when file is selected from camera
+      else if (this.uploadType === 'scan') {
+        this.processScan();
+      }
     }
   }
 
@@ -194,12 +214,13 @@ export class AppComponent implements OnInit {
   submitData() {
     const submissionData = {
       ...this.result,
-      remarks: this.remark
+      remarks: this.remark,
+      event_name: this.eventName
     };
 
     this.loading = true;
 
-    this.http.post(`${this.backendOrigin}/save-data`, submissionData)
+    this.http.post(`${this.backendOrigin}/api/save-data`, submissionData)
       .subscribe({
         next: (res: any) => {
           this.loading = false;
@@ -219,7 +240,9 @@ export class AppComponent implements OnInit {
   exportData() {
     this.exporting = true;
 
-    this.http.get(`${this.backendOrigin}/export-data`, {
+    const exportUrl = `${this.backendOrigin}/api/export-data?event=${encodeURIComponent(this.eventName)}`;
+
+    this.http.get(exportUrl, {
       responseType: 'blob',
       observe: 'response'
     }).subscribe({
@@ -227,7 +250,7 @@ export class AppComponent implements OnInit {
         this.exporting = false;
         const blob = new Blob([response.body], { type: 'text/csv' });
         const contentDisposition = response.headers.get('content-disposition');
-        let filename = 'business_cards.csv';
+        let filename = `business_cards_${this.eventName}.csv`;
 
         if (contentDisposition) {
           const match = /filename="?([^";]+)"?/.exec(contentDisposition);
