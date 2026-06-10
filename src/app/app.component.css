@@ -509,3 +509,38 @@
 .reset-btn:active {
   transform: translateY(0);
 }
+
+/* Style form inputs and textareas inside result cards and manual entry */
+.result-card input,
+.result-card textarea,
+.details-grid input,
+.details-grid textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e9ff;
+  background: #ffffff;
+  color: #222;
+  font-size: 0.98em;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.result-card input:focus,
+.result-card textarea:focus,
+.details-grid input:focus,
+.details-grid textarea:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 10px rgba(102, 126, 234, 0.15);
+}
+
+/* Make textareas visually consistent with inputs */
+.details-grid textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* Avoid default dark outlines in some browsers/themes */
+input::-moz-focus-inner {
+  border: 0;
+}

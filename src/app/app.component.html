@@ -45,11 +45,15 @@
         <input type="radio" id="upload" name="uploadType" value="upload" [(ngModel)]="uploadType" (change)="onUploadTypeChange()">
         <label for="upload">📁 Upload Image</label>
       </div>
+      <div class="choice-item">
+        <input type="radio" id="manual" name="uploadType" value="manual" [(ngModel)]="uploadType" (change)="onUploadTypeChange()">
+        <label for="manual">➕ Add Member (Manual Entry)</label>
+      </div>
     </div>
   </div>
 
   <input type="file" hidden #cameraInput (change)="onFileSelected($event)" accept="image/*" capture="environment">
-  <div class="file-upload-area" (click)="uploadType === 'upload' ? fileInput.click() : (uploadType === 'scan' && cameraInput.click())" [class.dragover]="isDragOver" (dragover)="isDragOver=true" (dragleave)="isDragOver=false" (drop)="onFileDrop($event)">
+  <div class="file-upload-area" *ngIf="uploadType !== 'manual'" (click)="uploadType === 'upload' ? fileInput.click() : (uploadType === 'scan' && cameraInput.click())" [class.dragover]="isDragOver" (dragover)="isDragOver=true" (dragleave)="isDragOver=false" (drop)="onFileDrop($event)">
     <input type="file" hidden #fileInput (change)="onFileSelected($event)" accept="image/*">
     <div class="upload-icon">📸</div>
     <p class="upload-text">
@@ -67,7 +71,7 @@
     </div>
   </div>
 
-  <button class="scan-btn" (click)="scanCard()" [disabled]="!uploadType || (uploadType === 'upload' && !selectedFile) || loading || exporting">
+  <button class="scan-btn" *ngIf="uploadType !== 'manual'" (click)="scanCard()" [disabled]="!uploadType || (uploadType === 'upload' && !selectedFile) || loading || exporting">
     <span *ngIf="!loading && uploadType === 'scan'">📷 Open Camera</span>
     <span *ngIf="!loading && uploadType === 'upload'">✓ Ready (Auto-scanning...)</span>
     <span *ngIf="loading">⏳ Scanning...</span>
@@ -120,6 +124,51 @@
     <div class="button-group">
       <button class="submit-btn" (click)="submitData()">✅ Submit</button>
       <button class="reset-btn" (click)="startOver()">🔄 Scan Another</button>
+    </div>
+  </div>
+
+  <div *ngIf="uploadType === 'manual'" class="result-card">
+    <h2>➕ Manual Entry</h2>
+
+    <div class="details-grid">
+      <div class="detail-item">
+        <label for="nameInput">Name:</label>
+        <input id="nameInput" [(ngModel)]="manualData.name" placeholder="Full name" />
+      </div>
+      <div class="detail-item">
+        <label for="designationInput">Designation:</label>
+        <input id="designationInput" [(ngModel)]="manualData.designation" placeholder="Designation" />
+      </div>
+      <div class="detail-item">
+        <label for="phoneInput">Phone:</label>
+        <input id="phoneInput" [(ngModel)]="manualData.phone" placeholder="Phone number" />
+      </div>
+      <div class="detail-item">
+        <label for="emailInput">Email:</label>
+        <input id="emailInput" [(ngModel)]="manualData.email" placeholder="Email address" />
+      </div>
+      <div class="detail-item">
+        <label for="companyInput">Company:</label>
+        <input id="companyInput" [(ngModel)]="manualData.company" placeholder="Company" />
+      </div>
+      <div class="detail-item">
+        <label for="websiteInput">Website:</label>
+        <input id="websiteInput" [(ngModel)]="manualData.website" placeholder="Website" />
+      </div>
+      <div class="detail-item full-width">
+        <label for="addressInput">Address:</label>
+        <textarea id="addressInput" [(ngModel)]="manualData.address" placeholder="Address" rows="3"></textarea>
+      </div>
+    </div>
+
+    <div class="remark-section">
+      <label for="manualRemark">📝 Remarks:</label>
+      <textarea id="manualRemark" [(ngModel)]="remark" placeholder="Add any additional notes or remarks..." rows="4"></textarea>
+    </div>
+
+    <div class="button-group">
+      <button class="submit-btn" (click)="submitManualData()">✅ Save Member</button>
+      <button class="reset-btn" (click)="startOver()">🔄 Reset</button>
     </div>
   </div>
 

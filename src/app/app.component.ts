@@ -24,6 +24,15 @@ export class AppComponent implements OnInit {
   backendPort = 3000;
   backendOverride = 'http://13.236.184.70'; // Production backend origin
   eventName = '';
+  manualData: any = {
+    name: '',
+    designation: '',
+    phone: '',
+    email: '',
+    company: '',
+    website: '',
+    address: ''
+  };
 
   constructor(private http: HttpClient, private route: ActivatedRoute) {}
 
@@ -86,6 +95,20 @@ export class AppComponent implements OnInit {
   onUploadTypeChange() {
     this.resetResult();
     if (this.uploadType === 'upload') {
+      this.closeCamera();
+    }
+
+    if (this.uploadType === 'manual') {
+      // Prepare blank manual entry form
+      this.manualData = {
+        name: '',
+        designation: '',
+        phone: '',
+        email: '',
+        company: '',
+        website: '',
+        address: ''
+      };
       this.closeCamera();
     }
   }
@@ -232,6 +255,31 @@ export class AppComponent implements OnInit {
           console.log(err)
           this.loading = false;
           console.error('Error saving data:', err);
+          alert('❌ Failed to save data. Please try again.');
+        }
+      });
+  }
+
+  submitManualData() {
+    const submissionData = {
+      ...this.manualData,
+      remarks: this.remark,
+      event_name: this.eventName
+    };
+
+    this.loading = true;
+
+    this.http.post(`${this.backendOrigin}/api/save-data`, submissionData)
+      .subscribe({
+        next: (res: any) => {
+          this.loading = false;
+          alert('✅ Member saved successfully!');
+          console.log('Save response:', res);
+          this.startOver();
+        },
+        error: (err) => {
+          this.loading = false;
+          console.error('Error saving manual data:', err);
           alert('❌ Failed to save data. Please try again.');
         }
       });
