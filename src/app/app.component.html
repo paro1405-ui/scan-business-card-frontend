@@ -16,8 +16,15 @@
         </button>
       </div>
     </div>
-    <div *ngIf="eventName" class="event-badge">
-      <strong>📅 Event:</strong> {{eventName}}
+    <div class="event-row">
+      <div class="event-badge" *ngIf="eventName">
+        <strong>📅 Event:</strong> {{eventName}}
+        <button type="button" class="edit-event-btn" title="Change event" (click)="openEventModal()">✏️</button>
+      </div>
+      <div class="event-badge empty" *ngIf="!eventName">
+        <strong>📅 Event:</strong> Not selected
+        <button type="button" class="edit-event-btn" title="Choose event" (click)="openEventModal()">✏️</button>
+      </div>
     </div>
   </div>
 
@@ -35,6 +42,34 @@
     </p>
   </div> -->
 
+  <div class="modal-backdrop" *ngIf="showEventModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Select Event</h2>
+        <p>Choose the active event you want to scan for. This will be used for saved results.</p>
+      </div>
+
+      <div *ngIf="eventList.length > 0" class="event-options">
+        <label class="event-option" *ngFor="let event of eventList">
+          <input type="radio" name="eventSelect" [value]="event.event_name" [(ngModel)]="selectedEventName" />
+          <span>{{event.event_name}}</span>
+        </label>
+      </div>
+
+      <div *ngIf="eventList.length === 0" class="event-empty-state">
+        <p>No active events are available right now.</p>
+        <p>Please add an active event in the backend event list or refresh the page.</p>
+      </div>
+
+      <div *ngIf="eventModalError" class="modal-error">{{eventModalError}}</div>
+
+      <div class="modal-actions">
+        <button class="primary-btn" (click)="confirmEventSelection()" [disabled]="eventList.length > 0 && !selectedEventName">Continue</button>
+        <button class="secondary-btn" type="button" *ngIf="eventName" (click)="cancelEventSelection()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div class="upload-section">
     <div class="upload-choice">
       <div class="choice-item">
@@ -47,7 +82,7 @@
       </div>
       <div class="choice-item">
         <input type="radio" id="manual" name="uploadType" value="manual" [(ngModel)]="uploadType" (change)="onUploadTypeChange()">
-        <label for="manual">➕ Add Member (Manual Entry)</label>
+        <label for="manual">➕ Add Card</label>
       </div>
     </div>
   </div>
@@ -122,8 +157,11 @@
     </div>
 
     <div class="button-group">
-      <button class="submit-btn" (click)="submitData()">✅ Submit</button>
-      <button class="reset-btn" (click)="startOver()">🔄 Scan Another</button>
+      <button class="submit-btn" (click)="submitData()" [disabled]="isSaving" [class.submitting]="isSaving">
+        <span *ngIf="!isSaving">✅ Submit</span>
+        <span *ngIf="isSaving">⏳ Saving...</span>
+      </button>
+      <button class="reset-btn" (click)="startOver()" [disabled]="isSaving">🔄 Scan Another</button>
     </div>
   </div>
 
@@ -167,8 +205,11 @@
     </div>
 
     <div class="button-group">
-      <button class="submit-btn" (click)="submitManualData()">✅ Save Member</button>
-      <button class="reset-btn" (click)="startOver()">🔄 Reset</button>
+      <button class="submit-btn" (click)="submitManualData()" [disabled]="isSaving" [class.submitting]="isSaving">
+        <span *ngIf="!isSaving">✅ Save Member</span>
+        <span *ngIf="isSaving">⏳ Saving...</span>
+      </button>
+      <button class="reset-btn" (click)="startOver()" [disabled]="isSaving">🔄 Reset</button>
     </div>
   </div>
 

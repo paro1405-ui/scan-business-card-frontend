@@ -22,8 +22,13 @@ export class AppComponent implements OnInit {
   isDragOver = false;
   remark = '';
   backendPort = 3000;
-  backendOverride = 'http://13.236.184.70'; // Production backend origin
+  backendOverride = ''; // Use current page origin by default when deployed
   eventName = '';
+  eventList: Array<{ id: number; name: string; is_active: boolean }> = [];
+  selectedEventName = '';
+  showEventModal = false;
+  eventModalError = '';
+  isSaving = false;
   manualData: any = {
     name: '',
     designation: '',
@@ -42,9 +47,22 @@ export class AppComponent implements OnInit {
       this.backendOverride = saved;
     }
 
+    const storedEvent = localStorage.getItem('selectedEventName');
+
     // Get event name from URL query parameters
     this.route.queryParams.subscribe(params => {
-      this.eventName = params['event'] || 'default';
+      const queryEvent = params['event'];
+      if (queryEvent) {
+        this.eventName = queryEvent;
+        localStorage.setItem('selectedEventName', this.eventName);
+        this.showEventModal = false;
+      } else if (storedEvent) {
+        this.eventName = storedEvent;
+        this.showEventModal = false;
+      } else {
+        this.loadActiveEvents();
+      }
+
       console.log('Event from URL:', this.eventName);
     });
   }
@@ -69,13 +87,66 @@ export class AppComponent implements OnInit {
       return normalized;
     }
 
-    const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-    const hostname = window.location.hostname || 'localhost';
-    return `${protocol}//${hostname}:${this.backendPort}`;
+    return window.location.origin;
   }
 
   get backendUrl() {
     return `${this.backendOrigin}/api/scan-card?event=${encodeURIComponent(this.eventName)}`;
+  }
+
+  loadActiveEvents() {
+    this.eventModalError = '';
+    this.http.get<Array<{ id: number; name: string; is_active: boolean }>>(`${this.backendOrigin}/api/events?active=true`)
+      .subscribe({
+        next: (events) => {
+          this.eventList = events;
+          if (!this.eventName) {
+            this.selectedEventName = events.length > 0 ? events[0].name : '';
+            this.showEventModal = true;
+          }
+        },
+        error: (err) => {
+          console.error('Error loading active events:', err);
+          this.eventModalError = 'Unable to load event list. Please refresh or try again later.';
+          if (!this.eventName) {
+            this.selectedEventName = '';
+            this.showEventModal = true;
+          }
+        }
+      });
+  }
+
+  openEventModal() {
+    if (this.eventList.length === 0) {
+      this.loadActiveEvents();
+      return;
+    }
+
+    this.selectedEventName = this.eventName || this.eventList[0]?.name || '';
+    this.showEventModal = true;
+  }
+
+  confirmEventSelection() {
+    if (this.eventList.length > 0 && !this.selectedEventName) {
+      return;
+    }
+
+    if (this.selectedEventName) {
+      this.eventName = this.selectedEventName;
+    } else if (!this.eventName) {
+      this.eventName = 'default';
+    }
+
+    localStorage.setItem('selectedEventName', this.eventName);
+    this.showEventModal = false;
+    window.history.replaceState(null, '', `${window.location.pathname}?event=${encodeURIComponent(this.eventName)}`);
+  }
+
+  cancelEventSelection() {
+    if (!this.eventName) {
+      return;
+    }
+    this.showEventModal = false;
   }
 
   onFileSelected(event: any) {
@@ -241,19 +312,19 @@ export class AppComponent implements OnInit {
       event_name: this.eventName
     };
 
-    this.loading = true;
+    this.isSaving = true;
 
     this.http.post(`${this.backendOrigin}/api/save-data`, submissionData)
       .subscribe({
         next: (res: any) => {
-          this.loading = false;
+          this.isSaving = false;
           alert('✅ Data saved successfully!');
           console.log('Save response:', res);
           this.startOver();
         },
         error: (err) => {
           console.log(err)
-          this.loading = false;
+          this.isSaving = false;
           console.error('Error saving data:', err);
           alert('❌ Failed to save data. Please try again.');
         }
@@ -267,18 +338,18 @@ export class AppComponent implements OnInit {
       event_name: this.eventName
     };
 
-    this.loading = true;
+    this.isSaving = true;
 
     this.http.post(`${this.backendOrigin}/api/save-data`, submissionData)
       .subscribe({
         next: (res: any) => {
-          this.loading = false;
+          this.isSaving = false;
           alert('✅ Member saved successfully!');
           console.log('Save response:', res);
           this.startOver();
         },
         error: (err) => {
-          this.loading = false;
+          this.isSaving = false;
           console.error('Error saving manual data:', err);
           alert('❌ Failed to save data. Please try again.');
         }

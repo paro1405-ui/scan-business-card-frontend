@@ -136,8 +136,16 @@
   opacity: 0.9;
 }
 
+.event-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
 .event-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   background: rgba(255, 255, 255, 0.25);
   border: 2px solid rgba(255, 255, 255, 0.5);
   color: white;
@@ -148,6 +156,133 @@
   font-size: 1em;
   font-weight: 600;
   backdrop-filter: blur(10px);
+}
+
+.event-badge.empty {
+  opacity: 0.9;
+}
+
+.edit-event-btn {
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.edit-event-btn:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  padding: 20px;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 520px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 70px rgba(0,0,0,0.18);
+  padding: 28px;
+  text-align: left;
+}
+
+.modal-header h2 {
+  margin-bottom: 10px;
+  color: #2d2d6a;
+}
+
+.modal-header p {
+  margin-bottom: 24px;
+  color: #555;
+  line-height: 1.5;
+}
+
+.event-options {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.event-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid #d7d7f2;
+  background: #fafbff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.event-option:hover {
+  background: #f4f6ff;
+}
+
+.event-option input {
+  accent-color: #667eea;
+}
+
+.event-option span {
+  font-weight: 600;
+  color: #222;
+}
+
+.event-empty-state {
+  padding: 16px;
+  background: #fff4f4;
+  border: 1px solid #ffd2d2;
+  border-radius: 14px;
+  color: #7a1e1e;
+  margin-bottom: 24px;
+}
+
+.modal-error {
+  margin-bottom: 20px;
+  color: #b00020;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.primary-btn,
+.secondary-btn {
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background: #667eea;
+  color: white;
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background: #f2f4ff;
+  color: #3b3f67;
 }
 
 .upload-section {
@@ -508,6 +643,18 @@
 .submit-btn:active,
 .reset-btn:active {
   transform: translateY(0);
+}
+
+.submit-btn:disabled,
+.reset-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submit-btn.submitting {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  opacity: 0.8;
 }
 
 /* Style form inputs and textareas inside result cards and manual entry */
