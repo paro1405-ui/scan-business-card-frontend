@@ -23,9 +23,12 @@ export class AppComponent implements OnInit {
   remark = '';
   backendPort = 3000;
   backendOverride = ''; // Use current page origin by default when deployed
+  productionBackend = 'http://13.236.184.70';
   eventName = '';
   eventList: Array<{ id: number; name: string; is_active: boolean }> = [];
+  eventLoading = false;
   selectedEventName = '';
+  customEventName = '';
   showEventModal = false;
   eventModalError = '';
   isSaving = false;
@@ -60,6 +63,10 @@ export class AppComponent implements OnInit {
         this.eventName = storedEvent;
         this.showEventModal = false;
       } else {
+        // No event set — show modal immediately and then load active events.
+        this.showEventModal = true;
+        this.eventModalError = '';
+        this.selectedEventName = '';
         this.loadActiveEvents();
       }
 
@@ -87,7 +94,28 @@ export class AppComponent implements OnInit {
       return normalized;
     }
 
-    return window.location.origin;
+    // When developing locally (frontend usually served on localhost:4200),
+    // point backend to localhost:3000 by default for convenience.
+    try {
+      const host = window.location.hostname;
+      const port = window.location.port;
+
+      if (port === '4200' || host === 'localhost' || host.startsWith('127.')) {
+        return 'http://localhost:3000';
+      }
+
+      // For deployed environments, prefer an explicit production backend
+      // if configured (e.g. your production IP), otherwise fall back to
+      // same-host with backendPort.
+      if (this.productionBackend && this.productionBackend.trim().length) {
+        return this.productionBackend.replace(/\/$/, '');
+      }
+
+      const proto = window.location.protocol || 'https:';
+      return `${proto}//${host}:${this.backendPort}`;
+    } catch (e) {
+      return window.location.origin;
+    }
   }
 
   get backendUrl() {
@@ -96,10 +124,12 @@ export class AppComponent implements OnInit {
 
   loadActiveEvents() {
     this.eventModalError = '';
+    this.eventLoading = true;
     this.http.get<Array<{ id: number; name: string; is_active: boolean }>>(`${this.backendOrigin}/api/events?active=true`)
       .subscribe({
         next: (events) => {
           this.eventList = events;
+          this.eventLoading = false;
           if (!this.eventName) {
             this.selectedEventName = events.length > 0 ? events[0].name : '';
             this.showEventModal = true;
@@ -107,6 +137,7 @@ export class AppComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error loading active events:', err);
+          this.eventLoading = false;
           this.eventModalError = 'Unable to load event list. Please refresh or try again later.';
           if (!this.eventName) {
             this.selectedEventName = '';
@@ -117,13 +148,15 @@ export class AppComponent implements OnInit {
   }
 
   openEventModal() {
+    this.customEventName = '';
+    this.showEventModal = true;
+
     if (this.eventList.length === 0) {
       this.loadActiveEvents();
       return;
     }
 
     this.selectedEventName = this.eventName || this.eventList[0]?.name || '';
-    this.showEventModal = true;
   }
 
   confirmEventSelection() {
@@ -131,7 +164,14 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    if (this.selectedEventName) {
+    if (this.selectedEventName === '__custom__') {
+      const txt = (this.customEventName || '').trim();
+      if (!txt) {
+        this.eventModalError = 'Please enter a name for the custom event';
+        return;
+      }
+      this.eventName = txt;
+    } else if (this.selectedEventName) {
       this.eventName = this.selectedEventName;
     } else if (!this.eventName) {
       this.eventName = 'default';
@@ -140,6 +180,17 @@ export class AppComponent implements OnInit {
     localStorage.setItem('selectedEventName', this.eventName);
     this.showEventModal = false;
     window.history.replaceState(null, '', `${window.location.pathname}?event=${encodeURIComponent(this.eventName)}`);
+  }
+
+  get confirmEnabled(): boolean {
+    if (this.eventList.length > 0) {
+      if (!this.selectedEventName) return false;
+      if (this.selectedEventName === '__custom__') {
+        return !!(this.customEventName && this.customEventName.trim().length);
+      }
+      return true;
+    }
+    return true;
   }
 
   cancelEventSelection() {

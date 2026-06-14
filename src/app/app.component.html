@@ -49,22 +49,34 @@
         <p>Choose the active event you want to scan for. This will be used for saved results.</p>
       </div>
 
-      <div *ngIf="eventList.length > 0" class="event-options">
+      <div *ngIf="eventLoading" class="event-loading">
+        <p>Loading events…</p>
+      </div>
+
+      <div *ngIf="!eventLoading && eventList.length > 0" class="event-options">
         <label class="event-option" *ngFor="let event of eventList">
           <input type="radio" name="eventSelect" [value]="event.event_name" [(ngModel)]="selectedEventName" />
           <span>{{event.event_name}}</span>
         </label>
+        <label class="event-option">
+          <input type="radio" name="eventSelect" [value]="'__custom__'" [(ngModel)]="selectedEventName" />
+          <span>Create Event</span>
+        </label>
+        <div *ngIf="selectedEventName === '__custom__'" class="custom-event-input">
+          <label for="customEventName">Event name:</label>
+          <input id="customEventName" type="text" [(ngModel)]="customEventName" placeholder="Type event name" />
+        </div>
       </div>
 
-      <div *ngIf="eventList.length === 0" class="event-empty-state">
+      <div *ngIf="!eventLoading && eventList.length === 0" class="event-empty-state">
         <p>No active events are available right now.</p>
         <p>Please add an active event in the backend event list or refresh the page.</p>
       </div>
 
-      <div *ngIf="eventModalError" class="modal-error">{{eventModalError}}</div>
+      <div *ngIf="!eventLoading && eventModalError" class="modal-error">{{eventModalError}}</div>
 
       <div class="modal-actions">
-        <button class="primary-btn" (click)="confirmEventSelection()" [disabled]="eventList.length > 0 && !selectedEventName">Continue</button>
+        <button class="primary-btn" (click)="confirmEventSelection()" [disabled]="!confirmEnabled">Continue</button>
         <button class="secondary-btn" type="button" *ngIf="eventName" (click)="cancelEventSelection()">Cancel</button>
       </div>
     </div>
