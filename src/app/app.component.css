@@ -211,6 +211,7 @@
 
 .event-options {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -225,6 +226,7 @@
   background: #fafbff;
   cursor: pointer;
   transition: all 0.2s ease;
+  min-height: 60px;
 }
 
 .event-option:hover {
@@ -233,11 +235,48 @@
 
 .event-option input {
   accent-color: #667eea;
+  flex-shrink: 0;
 }
 
 .event-option span {
   font-weight: 600;
   color: #222;
+  white-space: normal;
+}
+
+/* Scan By field styling inside event modal */
+.scan-by-field {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scan-by-field label {
+  font-size: 0.95em;
+  font-weight: 700;
+  color: #3b3f67;
+}
+
+.scan-by-field input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #d7d7f2;
+  background: #ffffff;
+  color: #222;
+  font-size: 1rem;
+  outline: none;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.scan-by-field input::placeholder {
+  color: #9ca3af;
+}
+
+.scan-by-field input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 10px rgba(102,126,234,0.16);
 }
 
 /* Custom event input styling inside modal */
@@ -288,6 +327,22 @@
 /* Highlight selected option text */
 .event-option input:checked + span {
   color: #2d2d6a;
+}
+
+.event-option input {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.event-prompt,
+.event-loading {
+  padding: 16px;
+  background: #f5f7ff;
+  border: 1px solid #d7d7f2;
+  border-radius: 14px;
+  color: #333;
+  margin-bottom: 24px;
+  font-size: 0.98rem;
 }
 
 .event-empty-state {

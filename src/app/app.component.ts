@@ -25,13 +25,14 @@ export class AppComponent implements OnInit {
   backendOverride = ''; // Use current page origin by default when deployed
   productionBackend = 'http://13.236.184.70';
   eventName = '';
-  eventList: Array<{ id: number; name: string; is_active: boolean }> = [];
+  eventList: Array<{ id: number; event_name: string; isactive: boolean }> = [];
   eventLoading = false;
   selectedEventName = '';
   customEventName = '';
   showEventModal = false;
   eventModalError = '';
   isSaving = false;
+  scanBy = '';
   manualData: any = {
     name: '',
     designation: '',
@@ -72,6 +73,11 @@ export class AppComponent implements OnInit {
 
       console.log('Event from URL:', this.eventName);
     });
+
+    const storedScanBy = localStorage.getItem('scanBy');
+    if (storedScanBy) {
+      this.scanBy = storedScanBy;
+    }
   }
 
   saveBackendOverride() {
@@ -125,13 +131,15 @@ export class AppComponent implements OnInit {
   loadActiveEvents() {
     this.eventModalError = '';
     this.eventLoading = true;
-    this.http.get<Array<{ id: number; name: string; is_active: boolean }>>(`${this.backendOrigin}/api/events?active=true`)
+    this.http.get<Array<{ id: number; event_name: string; isactive: boolean }>>(`${this.backendOrigin}/api/events?active=true`)
       .subscribe({
         next: (events) => {
           this.eventList = events;
           this.eventLoading = false;
+          if (events.length > 0 && !this.selectedEventName) {
+            this.selectedEventName = this.eventName || events[0].event_name;
+          }
           if (!this.eventName) {
-            this.selectedEventName = events.length > 0 ? events[0].name : '';
             this.showEventModal = true;
           }
         },
@@ -149,6 +157,9 @@ export class AppComponent implements OnInit {
 
   openEventModal() {
     this.customEventName = '';
+    // prefill scanBy from storage if available
+    const stored = localStorage.getItem('scanBy');
+    if (stored) this.scanBy = stored;
     this.showEventModal = true;
 
     if (this.eventList.length === 0) {
@@ -156,7 +167,7 @@ export class AppComponent implements OnInit {
       return;
     }
 
-    this.selectedEventName = this.eventName || this.eventList[0]?.name || '';
+    this.selectedEventName = this.eventName || this.eventList[0]?.event_name || '';
   }
 
   confirmEventSelection() {
@@ -178,11 +189,16 @@ export class AppComponent implements OnInit {
     }
 
     localStorage.setItem('selectedEventName', this.eventName);
+    // persist who is scanning
+    if (this.scanBy && this.scanBy.trim().length) {
+      localStorage.setItem('scanBy', this.scanBy.trim());
+    }
     this.showEventModal = false;
     window.history.replaceState(null, '', `${window.location.pathname}?event=${encodeURIComponent(this.eventName)}`);
   }
 
   get confirmEnabled(): boolean {
+    if (!this.scanBy || !this.scanBy.trim().length) return false;
     if (this.eventList.length > 0) {
       if (!this.selectedEventName) return false;
       if (this.selectedEventName === '__custom__') {
@@ -360,7 +376,8 @@ export class AppComponent implements OnInit {
     const submissionData = {
       ...this.result,
       remarks: this.remark,
-      event_name: this.eventName
+      event_name: this.eventName,
+      scan_by: this.scanBy
     };
 
     this.isSaving = true;
@@ -386,7 +403,8 @@ export class AppComponent implements OnInit {
     const submissionData = {
       ...this.manualData,
       remarks: this.remark,
-      event_name: this.eventName
+      event_name: this.eventName,
+      scan_by: this.scanBy
     };
 
     this.isSaving = true;
@@ -450,6 +468,15 @@ export class AppComponent implements OnInit {
     this.selectedFile = null;
     this.result = null;
     this.remark = '';
+    this.manualData = {
+      name: '',
+      designation: '',
+      phone: '',
+      email: '',
+      company: '',
+      website: '',
+      address: ''
+    };
     this.closeCamera();
   }
 

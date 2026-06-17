@@ -49,11 +49,20 @@
         <p>Choose the active event you want to scan for. This will be used for saved results.</p>
       </div>
 
+      <div class="scan-by-field">
+        <label for="scanByInput">Scan By:</label>
+        <input id="scanByInput" type="text" [(ngModel)]="scanBy" placeholder="Your name" />
+      </div>
+
       <div *ngIf="eventLoading" class="event-loading">
         <p>Loading events…</p>
       </div>
 
-      <div *ngIf="!eventLoading && eventList.length > 0" class="event-options">
+      <div *ngIf="!eventLoading && (!scanBy || !scanBy.trim().length)" class="event-prompt">
+        <p>Please enter your name above to load event selection.</p>
+      </div>
+
+      <div *ngIf="!eventLoading && scanBy && scanBy.trim().length && eventList.length > 0" class="event-options">
         <label class="event-option" *ngFor="let event of eventList">
           <input type="radio" name="eventSelect" [value]="event.event_name" [(ngModel)]="selectedEventName" />
           <span>{{event.event_name}}</span>
@@ -68,7 +77,7 @@
         </div>
       </div>
 
-      <div *ngIf="!eventLoading && eventList.length === 0" class="event-empty-state">
+      <div *ngIf="!eventLoading && scanBy && scanBy.trim().length && eventList.length === 0" class="event-empty-state">
         <p>No active events are available right now.</p>
         <p>Please add an active event in the backend event list or refresh the page.</p>
       </div>
