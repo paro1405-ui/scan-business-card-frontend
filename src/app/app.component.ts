@@ -23,7 +23,7 @@ export class AppComponent implements OnInit {
   remark = '';
   backendPort = 3000;
   backendOverride = ''; // Use current page origin by default when deployed
-  productionBackend = 'http://bettertogethercardscanner.com';
+  productionBackend = 'https://bettertogethercardscanner.com';
   eventName = '';
   eventList: Array<{ id: number; event_name: string; isactive: boolean }> = [];
   eventLoading = false;
