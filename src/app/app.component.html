@@ -210,13 +210,31 @@
         <label for="companyInput">Company:</label>
         <input id="companyInput" [(ngModel)]="manualData.company" placeholder="Company" />
       </div>
-      <div class="detail-item">
+
+      <!-- Conditional fields for IWS event -->
+      <div *ngIf="isIWSEvent()" class="detail-item">
+        <label for="cityInput">City:</label>
+        <input id="cityInput" [(ngModel)]="manualData.city" placeholder="City" />
+      </div>
+      <div *ngIf="isIWSEvent()" class="detail-item">
+        <label for="stateInput">State:</label>
+        <input id="stateInput" [(ngModel)]="manualData.state" placeholder="State" />
+      </div>
+
+      <!-- Conditional fields for non-IWS events -->
+      <div *ngIf="!isIWSEvent()" class="detail-item">
         <label for="websiteInput">Website:</label>
         <input id="websiteInput" [(ngModel)]="manualData.website" placeholder="Website" />
       </div>
-      <div class="detail-item full-width">
+      <div *ngIf="!isIWSEvent()" class="detail-item full-width">
         <label for="addressInput">Address:</label>
         <textarea id="addressInput" [(ngModel)]="manualData.address" placeholder="Address" rows="3"></textarea>
+      </div>
+
+      <!-- Rank field for all events -->
+      <div *ngIf="isIWSEvent()" class="detail-item">
+        <label for="rankInput">Rank:</label>
+        <input id="rankInput" [(ngModel)]="manualData.rank" placeholder="Rank" />
       </div>
     </div>
 

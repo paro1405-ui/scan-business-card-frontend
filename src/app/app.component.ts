@@ -237,7 +237,29 @@ export class AppComponent implements OnInit {
     }
 
     if (this.uploadType === 'manual') {
-      // Prepare blank manual entry form
+      // Prepare blank manual entry form with event-specific fields
+      this.initializeManualData();
+      this.closeCamera();
+    }
+  }
+
+  initializeManualData() {
+    // Check if the event is IWS for field customization
+    console.log('Initializing manual data for event:', this.eventName,this.eventName.toLowerCase());
+    const isIWSEvent = this.eventName && this.eventName.toLowerCase() === 'police expo';
+    
+    if (isIWSEvent) {
+      this.manualData = {
+        name: '',
+        designation: '',
+        phone: '',
+        email: '',
+        company: '',
+        city: '',
+        state: '',
+        rank: ''
+      };
+    } else {
       this.manualData = {
         name: '',
         designation: '',
@@ -247,8 +269,11 @@ export class AppComponent implements OnInit {
         website: '',
         address: ''
       };
-      this.closeCamera();
     }
+  }
+
+  isIWSEvent(): boolean {
+    return this.eventName && this.eventName.toLowerCase() === 'police expo';
   }
 
   async openCamera() {
@@ -468,15 +493,7 @@ export class AppComponent implements OnInit {
     this.selectedFile = null;
     this.result = null;
     this.remark = '';
-    this.manualData = {
-      name: '',
-      designation: '',
-      phone: '',
-      email: '',
-      company: '',
-      website: '',
-      address: ''
-    };
+    this.initializeManualData();
     this.closeCamera();
   }
 
