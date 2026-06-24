@@ -40,7 +40,10 @@ export class AppComponent implements OnInit {
     email: '',
     company: '',
     website: '',
-    address: ''
+    address: '',
+    city: '',
+    state: '',
+    rank: ''
   };
 
   constructor(private http: HttpClient, private route: ActivatedRoute) {}
@@ -244,36 +247,38 @@ export class AppComponent implements OnInit {
   }
 
   initializeManualData() {
-    // Check if the event is IWS for field customization
-    console.log('Initializing manual data for event:', this.eventName,this.eventName.toLowerCase());
-    const isIWSEvent = this.eventName && this.eventName.toLowerCase() === 'police expo';
-    
-    if (isIWSEvent) {
-      this.manualData = {
-        name: '',
-        designation: '',
-        phone: '',
-        email: '',
-        company: '',
-        city: '',
-        state: '',
-        rank: ''
-      };
-    } else {
-      this.manualData = {
-        name: '',
-        designation: '',
-        phone: '',
-        email: '',
-        company: '',
-        website: '',
-        address: ''
-      };
-    }
+    this.manualData = {
+      name: '',
+      designation: '',
+      phone: '',
+      email: '',
+      company: '',
+      website: '',
+      address: '',
+      city: '',
+      state: '',
+      rank: ''
+    };
   }
 
   isIWSEvent(): boolean {
-    return this.eventName && this.eventName.toLowerCase() === 'police expo';
+    if (!this.eventName) {
+      return false;
+    }
+    const normalized = this.eventName.trim().toLowerCase().replace(/\s+/g, '');
+    return normalized === 'iws';
+  }
+
+  isPoliceExpoEvent(): boolean {
+    if (!this.eventName) {
+      return false;
+    }
+    const normalized = this.eventName.trim().toLowerCase().replace(/\s+/g, '');
+    return normalized === 'policeexpo';
+  }
+
+  isSpecialEvent(): boolean {
+    return this.isIWSEvent() || this.isPoliceExpoEvent();
   }
 
   async openCamera() {
