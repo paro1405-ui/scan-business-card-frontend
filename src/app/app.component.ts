@@ -230,7 +230,6 @@ export class AppComponent implements OnInit {
   }
 
   get confirmEnabled(): boolean {
-    if (!this.scanBy || !this.scanBy.trim().length) return false;
     if (!this.selectedEventName) return false;
     if (this.selectedEventName === '__custom__') {
       return !!(this.customEventName && this.customEventName.trim().length);

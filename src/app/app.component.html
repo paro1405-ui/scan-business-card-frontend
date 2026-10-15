@@ -59,14 +59,14 @@
       </div>
 
       <div *ngIf="!eventLoading && (!scanBy || !scanBy.trim().length)" class="event-prompt">
-        <p>Please enter your name above to load event selection.</p>
+        <p>Enter your name if you want it recorded as the scanner.</p>
       </div>
 
-      <div *ngIf="!eventLoading && scanBy && scanBy.trim().length && eventList.length === 0" class="event-empty-state">
+      <div *ngIf="!eventLoading && eventList.length === 0" class="event-empty-state">
         <p>No active events are available. Create one below.</p>
       </div>
 
-      <div *ngIf="!eventLoading && scanBy && scanBy.trim().length" class="event-options">
+      <div *ngIf="!eventLoading" class="event-options">
         <label class="event-option" *ngFor="let event of eventList">
           <input type="radio" name="eventSelect" [value]="event.event_name" [(ngModel)]="selectedEventName" />
           <span>{{event.event_name}}</span>
@@ -84,7 +84,7 @@
       <div *ngIf="!eventLoading && eventModalError" class="modal-error">{{eventModalError}}</div>
 
       <div class="modal-actions">
-        <button class="primary-btn" (click)="confirmEventSelection()" [disabled]="!confirmEnabled || eventSaving">
+        <button class="primary-btn" type="button" (click)="confirmEventSelection()" [disabled]="!confirmEnabled || eventSaving">
           {{eventSaving ? 'Saving...' : 'Continue'}}
         </button>
         <button class="secondary-btn" type="button" *ngIf="eventName" (click)="cancelEventSelection()">Cancel</button>
