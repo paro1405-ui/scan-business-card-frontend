@@ -31,6 +31,7 @@ export class AppComponent implements OnInit {
   customEventName = '';
   showEventModal = false;
   eventModalError = '';
+  eventSaving = false;
   isSaving = false;
   scanBy = '';
   manualData: any = {
@@ -139,9 +140,9 @@ export class AppComponent implements OnInit {
         next: (events) => {
           this.eventList = events;
           this.eventLoading = false;
-          if (events.length > 0 && !this.selectedEventName) {
-            this.selectedEventName = this.eventName || events[0].event_name;
-          }
+          this.selectedEventName = events.length > 0
+            ? (this.eventName || events[0].event_name)
+            : '__custom__';
           if (!this.eventName) {
             this.showEventModal = true;
           }
@@ -150,8 +151,8 @@ export class AppComponent implements OnInit {
           console.error('Error loading active events:', err);
           this.eventLoading = false;
           this.eventModalError = 'Unable to load event list. Please refresh or try again later.';
+          this.selectedEventName = '__custom__';
           if (!this.eventName) {
-            this.selectedEventName = '';
             this.showEventModal = true;
           }
         }
@@ -166,6 +167,7 @@ export class AppComponent implements OnInit {
     this.showEventModal = true;
 
     if (this.eventList.length === 0) {
+      this.selectedEventName = '__custom__';
       this.loadActiveEvents();
       return;
     }
@@ -174,6 +176,10 @@ export class AppComponent implements OnInit {
   }
 
   confirmEventSelection() {
+    if (this.eventSaving) {
+      return;
+    }
+
     if (this.eventList.length > 0 && !this.selectedEventName) {
       return;
     }
@@ -184,13 +190,36 @@ export class AppComponent implements OnInit {
         this.eventModalError = 'Please enter a name for the custom event';
         return;
       }
-      this.eventName = txt;
+      this.eventModalError = '';
+      this.eventSaving = true;
+      this.http.post<{ id: number; event_name: string; isactive: boolean }>(`${this.backendOrigin}/api/events`, {
+        event_name: txt
+      }).subscribe({
+        next: (event) => {
+          if (!this.eventList.some(existing => existing.id === event.id)) {
+            this.eventList = [...this.eventList, event];
+          }
+          this.completeEventSelection(event.event_name);
+          this.eventSaving = false;
+        },
+        error: (err) => {
+          console.error('Error saving event:', err);
+          this.eventModalError = err.error?.error || 'Unable to save the event. Please try again.';
+          this.eventSaving = false;
+        }
+      });
+      return;
     } else if (this.selectedEventName) {
       this.eventName = this.selectedEventName;
     } else if (!this.eventName) {
       this.eventName = 'default';
     }
 
+    this.completeEventSelection(this.eventName);
+  }
+
+  private completeEventSelection(eventName: string) {
+    this.eventName = eventName;
     localStorage.setItem('selectedEventName', this.eventName);
     // persist who is scanning
     if (this.scanBy && this.scanBy.trim().length) {
@@ -202,14 +231,14 @@ export class AppComponent implements OnInit {
 
   get confirmEnabled(): boolean {
     if (!this.scanBy || !this.scanBy.trim().length) return false;
+    if (!this.selectedEventName) return false;
+    if (this.selectedEventName === '__custom__') {
+      return !!(this.customEventName && this.customEventName.trim().length);
+    }
     if (this.eventList.length > 0) {
-      if (!this.selectedEventName) return false;
-      if (this.selectedEventName === '__custom__') {
-        return !!(this.customEventName && this.customEventName.trim().length);
-      }
       return true;
     }
-    return true;
+    return false;
   }
 
   cancelEventSelection() {
