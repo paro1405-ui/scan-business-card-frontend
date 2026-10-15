@@ -9,3 +9,4 @@ logs/
 uploads/
 .DS_Store
 *.db
+.angular
