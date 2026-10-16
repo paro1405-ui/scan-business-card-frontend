@@ -25,15 +25,15 @@
         <strong>📅 Event:</strong> Not selected
         <button type="button" class="edit-event-btn" title="Choose event" (click)="openEventModal()">✏️</button>
       </div>
-      <button type="button" class="delete-event-btn" (click)="openDeleteEventModal()">Delete Event</button>
+      <button type="button" class="delete-event-btn" (click)="openDeleteEventModal()">Deactivate Event</button>
     </div>
   </div>
 
   <div class="modal-backdrop" *ngIf="showDeleteEventModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h2>Delete Event</h2>
-        <p>Select the event to delete, then enter an authorized email address.</p>
+        <h2>Deactivate Event</h2>
+        <p>Select an event to mark it inactive, then enter an authorized email address. Saved data will be retained.</p>
       </div>
 
       <div *ngIf="deleteEventLoading" class="event-loading">
@@ -41,13 +41,13 @@
       </div>
 
       <div *ngIf="!deleteEventLoading && deleteEventList.length === 0" class="event-empty-state">
-        <p>No events are available to delete.</p>
+        <p>No events are available.</p>
       </div>
 
       <div *ngIf="!deleteEventLoading && deleteEventList.length > 0" class="event-options delete-event-options">
         <label class="event-option" *ngFor="let event of deleteEventList">
           <input type="radio" name="deleteEventSelect" [value]="event.id" [(ngModel)]="selectedDeleteEventId" />
-          <span>{{event.event_name}}</span>
+          <span>{{event.event_name}} <small *ngIf="!event.isactive" class="event-status">(Inactive)</small></span>
         </label>
       </div>
 
@@ -71,7 +71,7 @@
           (click)="deleteSelectedEvent()"
           [disabled]="!canDeleteEvent || deleteEventSaving"
         >
-          {{deleteEventSaving ? 'Deleting...' : 'Delete Event'}}
+          {{deleteEventSaving ? 'Deactivating...' : 'Deactivate Event'}}
         </button>
         <button class="secondary-btn" type="button" (click)="closeDeleteEventModal()" [disabled]="deleteEventSaving">
           Cancel

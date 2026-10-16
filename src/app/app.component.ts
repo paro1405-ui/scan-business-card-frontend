@@ -299,11 +299,13 @@ export class AppComponent implements OnInit {
 
     this.deleteEventSaving = true;
     this.deleteEventError = '';
-    this.http.delete<{ id: number }>(`${this.backendOrigin}/api/events/${eventToDelete.id}`, {
+    this.http.delete<{ id: number; event_name: string; isactive: boolean }>(`${this.backendOrigin}/api/events/${eventToDelete.id}`, {
       body: { email: this.deleteEventEmail.trim() }
     }).subscribe({
-      next: () => {
-        this.deleteEventList = this.deleteEventList.filter(event => event.id !== eventToDelete.id);
+      next: (updatedEvent) => {
+        this.deleteEventList = this.deleteEventList.map(event =>
+          event.id === updatedEvent.id ? updatedEvent : event
+        );
         this.deleteEventSaving = false;
         this.showDeleteEventModal = false;
 
@@ -316,8 +318,8 @@ export class AppComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error deleting event:', err);
-        this.deleteEventError = err.error?.error || 'Unable to delete the event. Please try again.';
+        console.error('Error deactivating event:', err);
+        this.deleteEventError = err.error?.error || 'Unable to deactivate the event. Please try again.';
         this.deleteEventSaving = false;
       }
     });
