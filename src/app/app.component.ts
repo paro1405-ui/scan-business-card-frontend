@@ -34,6 +34,14 @@ export class AppComponent implements OnInit {
   eventSaving = false;
   isSaving = false;
   scanBy = '';
+  showDeleteEventModal = false;
+  deleteEventList: Array<{ id: number; event_name: string; isactive: boolean }> = [];
+  selectedDeleteEventId: number | null = null;
+  deleteEventEmail = '';
+  deleteEventLoading = false;
+  deleteEventSaving = false;
+  deleteEventError = '';
+  private readonly authorizedDeleteEmails = ['parosaw55@gmail.com', 'anuraggunjan@gmail.com'];
   manualData: any = {
     name: '',
     designation: '',
@@ -245,6 +253,74 @@ export class AppComponent implements OnInit {
       return;
     }
     this.showEventModal = false;
+  }
+
+  get canDeleteEvent(): boolean {
+    return this.selectedDeleteEventId !== null
+      && this.authorizedDeleteEmails.includes(this.deleteEventEmail.trim().toLowerCase());
+  }
+
+  openDeleteEventModal() {
+    this.showDeleteEventModal = true;
+    this.deleteEventList = [];
+    this.selectedDeleteEventId = null;
+    this.deleteEventEmail = '';
+    this.deleteEventError = '';
+    this.deleteEventLoading = true;
+    this.http.get<Array<{ id: number; event_name: string; isactive: boolean }>>(`${this.backendOrigin}/api/events`)
+      .subscribe({
+        next: (events) => {
+          this.deleteEventList = events;
+          this.selectedDeleteEventId = events[0]?.id ?? null;
+          this.deleteEventLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading events for deletion:', err);
+          this.deleteEventError = 'Unable to load events. Please try again.';
+          this.deleteEventLoading = false;
+        }
+      });
+  }
+
+  closeDeleteEventModal() {
+    this.showDeleteEventModal = false;
+  }
+
+  deleteSelectedEvent() {
+    if (!this.canDeleteEvent || this.deleteEventSaving || this.selectedDeleteEventId === null) {
+      return;
+    }
+
+    const eventToDelete = this.deleteEventList.find(event => event.id === this.selectedDeleteEventId);
+    if (!eventToDelete) {
+      this.deleteEventError = 'Select an event from the list.';
+      return;
+    }
+
+    this.deleteEventSaving = true;
+    this.deleteEventError = '';
+    this.http.delete<{ id: number }>(`${this.backendOrigin}/api/events/${eventToDelete.id}`, {
+      body: { email: this.deleteEventEmail.trim() }
+    }).subscribe({
+      next: () => {
+        this.deleteEventList = this.deleteEventList.filter(event => event.id !== eventToDelete.id);
+        this.deleteEventSaving = false;
+        this.showDeleteEventModal = false;
+
+        if (this.eventName === eventToDelete.event_name) {
+          this.eventName = '';
+          localStorage.removeItem('selectedEventName');
+          window.history.replaceState(null, '', window.location.pathname);
+          this.showEventModal = true;
+          this.loadActiveEvents();
+        }
+      },
+      error: (err) => {
+        console.error('Error deleting event:', err);
+        this.deleteEventError = err.error?.error || 'Unable to delete the event. Please try again.';
+        this.deleteEventSaving = false;
+      }
+    });
   }
 
   onFileSelected(event: any) {
