@@ -326,11 +326,7 @@
   white-space: normal;
 }
 
-.event-option .event-status {
-  color: #777;
-  font-size: 0.85em;
-  font-weight: 500;
-}
+
 
 /* Scan By field styling inside event modal */
 .scan-by-field {

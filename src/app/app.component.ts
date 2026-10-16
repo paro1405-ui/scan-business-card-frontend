@@ -267,7 +267,7 @@ export class AppComponent implements OnInit {
     this.deleteEventEmail = '';
     this.deleteEventError = '';
     this.deleteEventLoading = true;
-    this.http.get<Array<{ id: number; event_name: string; isactive: boolean }>>(`${this.backendOrigin}/api/events`)
+    this.http.get<Array<{ id: number; event_name: string; isactive: boolean }>>(`${this.backendOrigin}/api/events?active=true`)
       .subscribe({
         next: (events) => {
           this.deleteEventList = events;

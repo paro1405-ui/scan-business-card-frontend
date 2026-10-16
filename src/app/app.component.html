@@ -33,7 +33,7 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>Deactivate Event</h2>
-        <p>Select an event to mark it inactive, then enter an authorized email address. Saved data will be retained.</p>
+        <p>Select an active event to mark it inactive, then enter an authorized email address. Saved data will be retained.</p>
       </div>
 
       <div *ngIf="deleteEventLoading" class="event-loading">
@@ -47,7 +47,7 @@
       <div *ngIf="!deleteEventLoading && deleteEventList.length > 0" class="event-options delete-event-options">
         <label class="event-option" *ngFor="let event of deleteEventList">
           <input type="radio" name="deleteEventSelect" [value]="event.id" [(ngModel)]="selectedDeleteEventId" />
-          <span>{{event.event_name}} <small *ngIf="!event.isactive" class="event-status">(Inactive)</small></span>
+          <span>{{event.event_name}}</span>
         </label>
       </div>
 
